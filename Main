@@ -129,10 +129,12 @@ def main():
         if range < 1.5: 
             v01 = -1/60*self._loopCount+1
             controller.setVel([0,0,v01])
-        elif range == 1.5 and self._loopCount >60:
+        elif range == 1.5 and 60 <= self._loopCount <= 80:
+            controller.setVel([0,0,0])
+        elif range == 1.5 and self.loopCount >80:
             v12a = 1/30*(self._loopCount-60)
             controller.setVel([v12a,0,0])
-        elif range == 1.5 and 9 <= self._loopCount <= 112
+        elif range == 1.5 and 112 <= self._loopCount <= 132
             v12b = -1/50*(self._loopCount-60) + 1.64
             controller.setVel([v12b,0,0])
         controller.publishTargetPose(stateManagerInstance)
