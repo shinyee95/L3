@@ -112,7 +112,7 @@ def main():
     
 
 
-    rate = rospy.Rate(20) # rate will update publisher at 20hz, higher than the 2hz minimum before tieouts occur
+    rate = rospy.Rate(10) # rate will update publisher at 20hz, higher than the 2hz minimum before tieouts occur
     stateManagerInstance = stateManager(rate) #create new statemanager
 
     #Subscriptions
@@ -131,6 +131,7 @@ def main():
 
     while not rospy.is_shutdown():
         if range1 < 1.5: 
+            print(range1)
             v01 = 1 - 0.0166667*counter
             controller.setVel([0,0,v01])
         elif range1 == 1.5 and 60 <= counter <= 80:
