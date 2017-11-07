@@ -97,11 +97,17 @@ class stateManager: #class for monitoring and changing state of the controller
         return False
 
 def distanceCheck(msg):
-    global range    #import global range
+    global range1    #import global range
     print(msg.range) #for debugging
-    range = msg.range #set range = recieved range
+    range1 = msg.range #set range = recieved range
+
+
 
 def main():
+
+    global counter 
+    counter = 0
+
     rospy.init_node('navigator')   # make ros node
     
 
@@ -112,8 +118,8 @@ def main():
     #Subscriptions
     rospy.Subscriber("/mavros/state", State, stateManagerInstance.stateUpdate)  #get autopilot state including arm state, connection status and mode
     rospy.Subscriber("/mavros/distance_sensor/hrlv_ez4_pub", Range, distanceCheck)  #get current distance from ground 
-    global range #import global range variable
-    ###rospy.Subscriber("/mavros/px4flow/raw/optical_flow_rad", OpticalFlowRad, callback)  #subscribe to position messages
+    global range1 #import global range variable
+    range1 = 0 ###rospy.Subscriber("/mavros/px4flow/raw/optical_flow_rad", OpticalFlowRad, callback)  #subscribe to position messages
 
 
     #Publishers
@@ -123,21 +129,20 @@ def main():
     controller = velControl(velPub) #create new controller class and pass in publisher and state manager
     stateManagerInstance.waitForPilotConnection()   #wait for connection to flight controller
 
-
-
     while not rospy.is_shutdown():
-        if range < 1.5: 
-            v01 = -1/60*self._loopCount+1
+        if range1 < 1.5: 
+            v01 = 1 - 0.0166667*counter
             controller.setVel([0,0,v01])
-        elif range == 1.5 and 60 <= self._loopCount <= 80:
+        elif range1 == 1.5 and 60 <= counter <= 80:
             controller.setVel([0,0,0])
-        elif range == 1.5 and self.loopCount >80:
-            v12a = 1/30*(self._loopCount-80)
+        elif range1 == 1.5 and counter >80:
+            v12a = 0.0333333*(counter-80)
             controller.setVel([v12a,0,0])
-        elif range == 1.5 and 112 <= self._loopCount <= 132
-            v12b = -0.03*(self._loopCount- 80) + 1.96
+        elif range1 == 1.5 and 112 <= counter <= 132:
+            v12b = -0.03*(counter - 80) + 1.96
             controller.setVel([v12b,0,0])
         controller.publishTargetPose(stateManagerInstance)
+        counter = counter +1
         stateManagerInstance.incrementLoop()
         rate.sleep()    #sleep at the set rate
         if stateManagerInstance.getLoopCount() > 100:   #need to send some position data before we can switch to offboard mode otherwise offboard is rejected
